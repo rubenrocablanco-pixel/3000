@@ -1,0 +1,722 @@
+﻿<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Nuestro Año ✨</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+
+<style>
+:root{
+  --bg1:#1a1026;
+  --bg2:#0f061a;
+  --accent:#ff6b9d;
+  --accent-soft:#ffc2d9;
+  --text:#ffffff;
+  --muted:#cbbdd9;
+}
+body.demon{
+  background:radial-gradient(circle at 20% 20%, #3a0000, #100000) !important;
+  color:#ffdddd;
+} 
+
+*{margin:0;padding:0;box-sizing:border-box}
+
+body{
+  font-family:'Inter',sans-serif;
+  background:radial-gradient(circle at 20% 20%, #2a1240, var(--bg2));
+  color:var(--text);
+  overflow-x:hidden;
+}
+
+section{padding:80px 20px;max-width:1200px;margin:auto}
+
+h1,h2{
+  font-family:'Playfair Display',serif;
+}
+
+.hero{
+  min-height:100vh;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  text-align:center;
+  position:relative;
+  overflow:hidden;
+}
+/* global animation layers behind content but above background */
+#globalHearts, #globalEmoji{position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:0;}
+#hearts{position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:0;}
+/* ensure primary content floats above animations */
+.hero h1, .hero p, .hero-buttons, .gallery, .timeline, footer{position:relative;z-index:1;}
+
+.hero h1 {
+  font-size: clamp(2.8rem, 6vw, 9rem);
+  background: linear-gradient(90deg, #ff3366, #ff6b6b, #ff9f43);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+  line-height: 1.05;
+  margin: 0 0 1.5rem;
+}
+
+.hero p{
+  margin-top:20px;
+  font-size:1.3rem;
+  color:var(--muted);
+  max-width:700px;
+}
+
+.button{
+  margin-top:40px;
+  padding:16px 36px;
+  border-radius:50px;
+  border:none;
+  background:linear-gradient(135deg,var(--accent),#ff9ecb);
+  color:#2a0f1f;
+  font-weight:700;
+  cursor:pointer;
+  font-size:1rem;
+  box-shadow:0 10px 40px rgba(255,107,157,.4);
+  transition:.3s ease;
+}
+
+.button:hover{
+  transform:scale(1.07);
+}
+.btn-icon{width:20px;height:20px;vertical-align:middle;margin-left:6px;filter:invert(1);}
+
+.button.ghost{
+  background:transparent;
+  color:var(--accent);
+  border:2px solid var(--accent);
+  box-shadow:none;
+}
+.hero-buttons{display:flex;flex-wrap:wrap;justify-content:center;gap:12px;margin-top:20px;}
+.player-controls button{padding:6px 12px;margin:0 6px;border:none;border-radius:8px;background:var(--accent-soft);cursor:pointer;}
+#audioContainer audio{width:100%;max-width:500px;}
+
+/* custom mp3 player style */
+.mp3-player{
+  width:260px;
+  background:#111;
+  color:#fff;
+  border-radius:14px;
+  padding:12px;
+  margin-top:20px;
+  box-shadow:0 4px 15px rgba(0,0,0,.6);
+  font-family:'Inter',sans-serif;
+}
+.mp3-player #trackInfo{
+  font-size:0.9rem;
+  height:20px;
+  overflow:hidden;
+  white-space:nowrap;
+  text-overflow:ellipsis;
+}
+.mp3-player .controls{
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  gap:12px;
+  margin-top:8px;
+}
+.mp3-player .controls button{
+  background:#222;
+  border:none;
+  color:#fff;
+  width:36px;
+  height:36px;
+  border-radius:50%;
+  cursor:pointer;
+  font-size:1.1rem;
+}
+.mp3-player .controls button:active{
+  transform:scale(0.92);
+}
+/* emoji rain */
+.emoji{position:absolute;font-size:24px;animation:fall 6s linear infinite;pointer-events:none;}
+@keyframes fall{0%{transform:translateY(-40px) rotate(0deg);opacity:1;}100%{transform:translateY(110vh) rotate(360deg);opacity:0;}}
+/* surprise overlay */
+.overlay{
+  position:fixed;inset:0;
+  background:rgba(0,0,0,0.85);
+  display:flex;align-items:center;justify-content:center;
+  padding:20px;z-index:100;backdrop-filter:blur(4px);
+  opacity:0;pointer-events:none;transition:opacity .3s;
+}
+.overlay.show{opacity:1;pointer-events:auto;}
+.overlay .popup{
+  background:linear-gradient(135deg,rgba(255,255,255,0.1),rgba(255,255,255,0.05));
+  padding:30px;border-radius:20px;max-width:500px;text-align:center;
+}
+.overlay .popup h2{font-family:'Playfair Display',cursive;font-size:2.5rem;margin-bottom:.5rem;}
+.overlay .popup img{max-width:100%;height:auto;display:block;margin:12px auto;}
+.overlay .popup p{line-height:1.5;margin-bottom:1.5rem;}
+.overlay .popup button{background:var(--accent);color:#2a0f1f;padding:10px 20px;border:none;border-radius:40px;cursor:pointer;box-shadow:0 4px 20px rgba(0,0,0,0.2);}
+@media print{
+  body{background:#fff;color:#000;}
+  .button,.hero-buttons{display:none;}
+}
+
+.glass{
+  background:rgba(255,255,255,.05);
+  backdrop-filter:blur(12px);
+  border-radius:25px;
+  padding:50px;
+  box-shadow:0 20px 60px rgba(0,0,0,.4);
+}
+
+.names{
+  font-size:2.5rem;
+  margin-bottom:20px;
+}
+
+.message{
+  font-size:1.2rem;
+  line-height:1.8;
+  color:var(--muted);
+  white-space:pre-line;
+}
+
+.gallery{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(250px,1fr));
+  gap:12px;
+  margin-top:25px;
+}
+
+.gallery img{
+  width:100%;
+  height:320px;
+  object-fit:cover;
+  border-radius:20px;
+  transition:.5s ease;
+  box-shadow:0 15px 40px rgba(0,0,0,.5);
+}
+
+.gallery img:hover{
+  transform:scale(1.05);
+}
+
+.timeline{
+  margin-top:70px;
+  display:grid;
+  gap:30px;
+}
+
+.timeline-item{
+  background:rgba(255,255,255,.06);
+  padding:30px;
+  border-radius:20px;
+  transition:.4s;
+}
+
+.timeline-item:hover{
+  transform:translateY(-6px);
+}
+
+.countdown{
+  display:flex;
+  justify-content:center;
+  gap:30px;
+  margin-top:50px;
+  flex-wrap:wrap;
+}
+
+.time-box{
+  background:rgba(255,255,255,.08);
+  padding:25px 35px;
+  border-radius:20px;
+  text-align:center;
+  min-width:120px;
+}
+
+.time-box span{
+  font-size:2rem;
+  font-weight:600;
+  color:var(--accent-soft);
+}
+
+footer{
+  text-align:center;
+  padding:50px 20px;
+  color:var(--muted);
+}
+
+/* floating hearts */
+.heart{
+  position:absolute;
+  width:20px;
+  height:20px;
+  background:var(--accent);
+  transform:rotate(-45deg);
+  animation:float 8s linear infinite;
+}
+
+.heart::before,
+.heart::after{
+  content:'';
+  position:absolute;
+  width:20px;
+  height:20px;
+  background:var(--accent);
+  border-radius:50%;
+}
+
+.heart::before{top:-10px;left:0}
+.heart::after{left:10px;top:0}
+
+@keyframes float{
+  0%{transform:translateY(100vh) rotate(-45deg);opacity:0}
+  20%{opacity:1}
+  100%{transform:translateY(-10vh) rotate(-45deg);opacity:0}
+}
+
+@media(max-width:700px){
+  .glass{padding:30px}
+  .gallery img{height:220px}
+}
+</style>
+</head>
+<body>
+<noscript><p style="text-align:center;color:#f88;padding:20px;">Activa JavaScript para ver esta página correctamente.</p></noscript>
+<div id="versionBanner" style="position:fixed;top:0;left:0;width:100%;background:#ff6b9d;color:#2a0f1f;text-align:center;padding:4px 0;font-size:0.9rem;z-index:200;transition:opacity .6s;">VERSIÓN ACTUALIZADA</div>
+
+<div id="globalHearts" aria-hidden="true"></div>
+<div id="globalEmoji" aria-hidden="true"></div>
+
+<section class="hero">
+  <h1 id="titleText">Un Año Contigo ✨</h1>
+  <p id="subtitleText">Hace un año empezó algo que cambió mi mundo. Y si pudiera volver atrás, elegiría el mismo momento, la misma sonrisa, la misma historia.</p>
+  <div class="hero-buttons">
+    <button class="button" id="surpriseBtn" title="Mensaje secreto + confetti">🎉 Sorpresa</button>
+    <button class="button ghost" id="galleryBtn">🖼 Ver galería</button>
+    <button class="button ghost" id="shareBtn">🔗 Compartir</button>
+    <button class="button ghost" id="modeBtn">😈</button>
+  </div>
+
+  <!-- audio player styled like mini MP3 device -->
+  <div id="audioContainer" class="mp3-player" aria-label="Reproductor">
+    <div id="trackInfo">—</div>
+    <div class="controls">
+      <button id="prevTrack" title="Pista anterior">⏮</button>
+      <button id="playPause" title="Reproducir/Pausar">▶︎</button>
+      <button id="nextTrack" title="Siguiente pista">⏭</button>
+    </div>
+  </div>
+  <audio id="musicPlayer" src="" preload="metadata" style="display:none;"></audio>
+
+  <!-- spotify embed container (se rellena si config tiene URL) -->
+  <div id="spotifyEmbed" style="margin-top:18px;"></div>
+</section>
+
+<section>
+  <div class="glass">
+    <div class="names">Roca & Amor</div>
+    <div class="message" id="mainMessage">
+      365 días de recuerdos.
+      365 días aprendiendo, creciendo y soñando juntos.
+      Y esto no es el final del primer capítulo.
+      Es el prólogo de todo lo que nos queda por vivir.
+    </div>
+
+    <div class="countdown" id="countdownContainer">
+      <div class="time-box"><span id="days">0</span><br>Días</div>
+      <div class="time-box"><span id="hours">0</span><br>Horas</div>
+      <div class="time-box"><span id="minutes">0</span><br>Min</div>
+    </div>
+  </div>
+
+  <div class="gallery" id="gallerySection" aria-live="polite">
+    <!-- imágenes añadidas por JS -->
+  </div>
+
+  <div class="timeline" id="timelineSection">
+    <!-- timeline añadido por JS -->
+  </div>
+</section>
+
+<footer>
+  Feliz primer aniversario ❤️ Lo mejor está por venir.
+</footer>
+
+<!-- surprise modal -->
+<div id="overlay" class="overlay" role="dialog" aria-modal="true" aria-hidden="true">
+  <div class="popup">
+    <h2>Feliz aniversario</h2>
+    <img id="popupImage" src="" alt="" style="max-width:100%;border-radius:12px;margin:12px 0;display:none;">
+    <p id="popupMessage"></p>
+    <button id="closePopup">Cerrar</button>
+  </div>
+</div>
+
+<script>
+console.log('lita.html script loaded');
+// show banner only once per session
+if(!localStorage.getItem('seenVersion')){
+  localStorage.setItem('seenVersion','1');
+  // hide banner after couple seconds
+  setTimeout(()=>{ const vb=document.getElementById('versionBanner'); if(vb) vb.style.opacity='0'; },5000);
+} else {
+  const vb=document.getElementById('versionBanner'); if(vb) vb.style.opacity='0';
+}
+
+const CONFIG = {
+  name1:'Ruben',
+  name2:'Paula',
+  // anniversaryDate unused now; countdown calculates next March 9 automatically
+  anniversaryDate:'2026-03-02',
+  musicUrl:'',
+  photos:[
+    'https://images.unsplash.com/photo-1529626455594-4ff0802cfb7e?w=1200&q=80&auto=format&fit=crop',
+    'https://images.unsplash.com/photo-1503342217505-b0a15ec3261c?w=1200&q=80&auto=format&fit=crop',
+    'https://images.unsplash.com/photo-1511988617509-a57c8a288659?w=1200&q=80&auto=format&fit=crop'
+  ],
+  secretMessage:'Eres mi lugar favorito en el mundo. Gracias por este año increíble ❤️',
+  surpriseImage:'https://via.placeholder.com/800x400?text=Te+quiero',
+  timeline:[
+    {title:'Primera Cita',desc:'El día que empezó todo.'},
+    {title:'Primer Viaje',desc:'Donde entendí que contigo cualquier lugar es hogar.'},
+    {title:'Nuestros Momentos',desc:'Las pequeñas cosas que se volvieron eternas.'}
+  ],
+  audioTracks:[],
+  spotifyUrl:'https://open.spotify.com/embed/playlist/1TvHPEsbb1aB8ldHqVRChi?si=b548fb0d32f24d27',
+  demonMessage:'Cuando el demonio despierta, las palabras se visten de fuego y deseo...',
+  demonPhotos:[],
+  demonTimeline:[
+    {title:'Noche de locura',desc:'Recuerdo que no puedo contar…'},
+    {title:'Secretos',desc:'Lo que queda entre nosotros'},
+  ]
+};
+
+function $(selector){ return document.querySelector(selector); }
+
+// apply config text
+$('#titleText').textContent = 'Un Año Contigo ✨';
+$('#subtitleText').textContent = 'Hace un año empezó algo que cambió mi mundo. Y si pudiera volver atrás, elegiría el mismo momento, la misma sonrisa, la misma historia.';
+$('.names') && ($('.names').textContent = `${CONFIG.name1} & ${CONFIG.name2}`);
+// update any hardcoded placeholders
+$('#titleText').textContent = 'Un Año Contigo ✨';
+$('#subtitleText').textContent = 'Hace un año empezó algo que cambió mi mundo. Y si pudiera volver atrás, elegiría el mismo momento, la misma sonrisa, la misma historia.';
+$('#mainMessage').textContent = `365 días de recuerdos.\n365 días aprendiendo, creciendo y soñando juntos.\nY esto no es el final del primer capítulo.\nEs el prólogo de todo lo que nos queda por vivir.`;
+
+// spotify embed if configured (only if container exists)
+if(CONFIG.spotifyUrl && $('#spotifyEmbed')){
+  $('#spotifyEmbed').innerHTML = `<iframe src="${CONFIG.spotifyUrl}" width="300" height="80" frameborder="0" allow="encrypted-media"></iframe>`;
+}
+
+// compute next March 9 occurrence for countdown
+function nextMarch9(){
+  const now = new Date();
+  const year = now.getFullYear();
+  let target = new Date(`${year}-03-09T00:00:00`);
+  if(target <= now){
+    target = new Date(`${year+1}-03-09T00:00:00`);
+  }
+  return target;
+}
+let anniversaryDate = nextMarch9();
+
+// build gallery safely
+function buildGallery(photos){
+  const gallery = document.getElementById('gallerySection');
+  gallery.innerHTML = '';
+  photos.forEach((src, i)=>{
+    const img = document.createElement('img');
+    img.src = src;
+    img.alt = `Foto ${i+1}`;
+    img.onerror = ()=>{ img.style.opacity='0.5'; img.alt='imagen no disponible'; };
+    gallery.appendChild(img);
+  });
+}
+buildGallery(CONFIG.photos);
+
+// build timeline
+function buildTimeline(items){
+  const tl = document.getElementById('timelineSection');
+  tl.innerHTML = '';
+  items.forEach(it=>{
+    const div = document.createElement('div');
+    div.className = 'timeline-item';
+    div.innerHTML = `<h2>${it.title}</h2><p>${it.desc}</p>`;
+    tl.appendChild(div);
+  });
+}
+buildTimeline(CONFIG.timeline);
+
+// countdown
+let countdownInterval;
+function updateCountdown(){
+  const now = new Date();
+  // recalc target each second so that after March 9 rolls over it moves to next year
+  anniversaryDate = nextMarch9();
+  const diff = anniversaryDate - now;
+  const daysEl = $('#days'), hoursEl = $('#hours'), minutesEl = $('#minutes');
+  if(diff <= 0){
+    // anniversary reached
+    if(countdownInterval) clearInterval(countdownInterval);
+    daysEl.textContent = '0';
+    hoursEl.textContent = '0';
+    minutesEl.textContent = '0';
+    // show overlay surprise automatically (optional)
+    // showSurprise(); // <-- uncomment if quieres que salte automáticamente el día
+    return;
+  }
+  const days = Math.floor(diff / (1000*60*60*24));
+  const hours = Math.floor((diff / (1000*60*60)) % 24);
+  const minutes = Math.floor((diff / (1000*60)) % 60);
+  daysEl.textContent = days;
+  hoursEl.textContent = hours;
+  minutesEl.textContent = minutes;
+}
+countdownInterval = setInterval(updateCountdown, 1000);
+updateCountdown();
+
+// surprise confetti + modal
+function launchConfetti(){
+  const canvas = document.createElement('canvas');
+  canvas.style.position='fixed';
+  canvas.style.left='0';
+  canvas.style.top='0';
+  canvas.style.width='100%';
+  canvas.style.height='100%';
+  canvas.style.pointerEvents='none';
+  canvas.style.zIndex='9999';
+  document.body.appendChild(canvas);
+  const ctx = canvas.getContext('2d');
+  let W = canvas.width = window.innerWidth;
+  let H = canvas.height = window.innerHeight;
+  const pieces = [];
+  const style = getComputedStyle(document.documentElement);
+  const colors = [
+    style.getPropertyValue('--accent').trim() || '#ff6b9d',
+    style.getPropertyValue('--accent-soft').trim() || '#ffc2d9',
+    '#fff'
+  ];
+  for(let i=0;i<150;i++){
+    pieces.push({
+      x: Math.random()*W,
+      y: Math.random()*H - H,
+      r: Math.random()*6+4,
+      d: Math.random()*20+10,
+      color: colors[Math.floor(Math.random()*colors.length)],
+      tilt: Math.random()*10-10,
+      tiltAngleIncremental: Math.random()*0.07+0.05,
+      tiltAngle: 0
+    });
+  }
+  function draw(){
+    ctx.clearRect(0,0,W,H);
+    pieces.forEach(p=>{
+      ctx.beginPath();
+      ctx.lineWidth = p.r;
+      ctx.strokeStyle = p.color;
+      ctx.moveTo(p.x + p.tilt + p.r/2, p.y);
+      ctx.lineTo(p.x + p.tilt, p.y + p.tilt + p.r/2);
+      ctx.stroke();
+    });
+    update();
+  }
+  function update(){
+    pieces.forEach(p=>{
+      p.tiltAngle += p.tiltAngleIncremental;
+      p.y += (Math.cos(p.d) + 3 + p.r/2) / 2;
+      p.tilt = Math.sin(p.tiltAngle) * 15;
+      if(p.y > H){ p.x = Math.random()*W; p.y = -20; }
+    });
+  }
+  (function animate(){ draw(); requestAnimationFrame(animate); })();
+  setTimeout(()=> canvas.remove(), 5000);
+}
+function showSurprise(){
+  launchConfetti();
+  $('#popupMessage').textContent = CONFIG.secretMessage || '';
+  const img = $('#popupImage');
+  img.src = CONFIG.surpriseImage || '';
+  img.style.display = img.src ? 'block' : 'none';
+  $('#overlay').classList.add('show');
+  $('#overlay').setAttribute('aria-hidden','false');
+}
+$('#surpriseBtn').addEventListener('click', showSurprise);
+$('#closePopup').addEventListener('click', ()=> {
+  $('#overlay').classList.remove('show');
+  $('#overlay').setAttribute('aria-hidden','true');
+});
+
+// audio player / playlist
+const audio = $('#musicPlayer');
+let trackIndex = 0;
+const playBtn = $('#playPause');
+const prevBtn = $('#prevTrack');
+const nextBtn = $('#nextTrack');
+
+function updateTrackInfo(){
+  const info = $('#trackInfo');
+  const url = (CONFIG.audioTracks && CONFIG.audioTracks[trackIndex]) || '';
+  const name = url ? url.substring(url.lastIndexOf('/')+1) : '—';
+  info.textContent = decodeURIComponent(name);
+}
+
+// single loadTrack definition (safe wrap)
+function loadTrack(i){
+  if(!CONFIG.audioTracks || CONFIG.audioTracks.length === 0){
+    audio.removeAttribute('src');
+    audio.load();
+    $('#trackInfo').textContent = 'No hay pistas';
+    return;
+  }
+  trackIndex = ((i % CONFIG.audioTracks.length) + CONFIG.audioTracks.length) % CONFIG.audioTracks.length;
+  audio.src = CONFIG.audioTracks[trackIndex];
+  audio.load();
+  audio.play().then(()=> {
+    if(playBtn) playBtn.textContent = '⏸︎';
+  }).catch(()=> {
+    // autoplay blocked until user interacts — leave icon as play
+    if(playBtn && audio.paused) playBtn.textContent = '▶︎';
+  });
+  updateTrackInfo();
+}
+
+if(prevBtn) prevBtn.addEventListener('click', ()=> loadTrack(trackIndex - 1));
+if(nextBtn) nextBtn.addEventListener('click', ()=> loadTrack(trackIndex + 1));
+if(playBtn){
+  playBtn.addEventListener('click', ()=>{
+    if(!audio.src){
+      loadTrack(trackIndex);
+      return;
+    }
+    if(audio.paused){
+      audio.play().then(()=> { playBtn.textContent = '⏸︎'; }).catch(()=>{});
+    } else {
+      audio.pause();
+      playBtn.textContent = '▶︎';
+    }
+  });
+}
+
+// update UI when the audio ends
+audio.addEventListener('ended', ()=> loadTrack(trackIndex + 1));
+audio.addEventListener('play', ()=> { if(playBtn) playBtn.textContent = '⏸︎'; });
+audio.addEventListener('pause', ()=> { if(playBtn) playBtn.textContent = '▶︎'; });
+
+// initialize track info (no autoplay)
+if(CONFIG.audioTracks && CONFIG.audioTracks.length) updateTrackInfo();
+else $('#trackInfo').textContent = 'No hay pistas';
+
+// gallery button: navigate to gallery page if it exists, otherwise scroll
+$('#galleryBtn').addEventListener('click', (e)=>{
+  e.preventDefault();
+  // if we're already on the gallery page, do nothing
+  if(location.pathname.endsWith('gallery.html')) return;
+  // try to open gallery.html; if it fails or not available, fallback to scrolling
+  const tryNav = () => {
+    const win = window.open('gallery.html','_self');
+    if(!win) {
+      // popup blocked? just scroll
+      const g = document.getElementById('gallerySection');
+      if(g) g.scrollIntoView({behavior:'smooth'});
+    }
+  };
+  tryNav();
+});
+
+// share
+$('#shareBtn').addEventListener('click', ()=>{
+  const shareData = { title: 'Nuestro Año', text: 'Mira esto', url: location.href };
+  if(navigator.share){
+    navigator.share(shareData).catch(()=>{});
+  } else if(navigator.clipboard && location.href){
+    navigator.clipboard.writeText(location.href).then(()=> alert('Enlace copiado') ).catch(()=>{
+      prompt('Copia este enlace manualmente:', location.href);
+    });
+  } else {
+    prompt('Copia este enlace:', location.href);
+  }
+});
+
+// demon/heart mode
+let demonMode = false;
+function startEmojiRain(selector){
+  const container = document.querySelector(selector) || document.body;
+  if(!container) return;
+  window._emojiInterval = window._emojiInterval || setInterval(()=>{
+    const emoji = document.createElement('div');
+    emoji.className='emoji';
+    emoji.textContent = Math.random() < 0.5 ? '🍑' : '🍆';
+    emoji.style.left = Math.random()*100 + 'vw';
+    container.appendChild(emoji);
+    setTimeout(()=> emoji.remove(), 7000);
+  }, 300);
+}
+function stopEmojiRain(){
+  clearInterval(window._emojiInterval);
+  window._emojiInterval = null;
+  document.querySelectorAll('.emoji').forEach(e=>e.remove());
+}
+function startHeartRain(selector){
+  const container = document.querySelector(selector) || document.body;
+  if(!container) return;
+  window._heartInterval = window._heartInterval || setInterval(()=>{
+    const heart = document.createElement('div');
+    heart.className='heart';
+    heart.style.left = Math.random()*100 + 'vw';
+    heart.style.animationDuration = (6 + Math.random()*5) + 's';
+    container.appendChild(heart);
+    setTimeout(()=> heart.remove(), 10000);
+  }, 800);
+}
+function stopHeartRain(){
+  clearInterval(window._heartInterval);
+  window._heartInterval = null;
+  document.querySelectorAll('.heart').forEach(h=>h.remove());
+}
+
+function enableDemonMode(){
+  demonMode = true;
+  document.body.classList.add('demon');
+  $('#modeBtn').textContent = '❤️';
+  $('#mainMessage').textContent = CONFIG.demonMessage || $('#mainMessage').textContent;
+  if(CONFIG.demonPhotos && CONFIG.demonPhotos.length) buildGallery(CONFIG.demonPhotos);
+  if(CONFIG.demonTimeline && CONFIG.demonTimeline.length) buildTimeline(CONFIG.demonTimeline);
+  stopHeartRain();
+  startEmojiRain('#globalEmoji');
+}
+function disableDemonMode(){
+  demonMode = false;
+  document.body.classList.remove('demon');
+  $('#modeBtn').textContent = '😈';
+  $('#mainMessage').textContent = `365 días de recuerdos.\n365 días aprendiendo, creciendo y soñando juntos.\nY esto no es el final del primer capítulo.\nEs el prólogo de todo lo que nos queda por vivir.`;
+  buildGallery(CONFIG.photos);
+  buildTimeline(CONFIG.timeline);
+  stopEmojiRain();
+  startHeartRain('#globalHearts');
+}
+
+$('#modeBtn').addEventListener('click', ()=>{
+  if(!demonMode) enableDemonMode(); else disableDemonMode();
+});
+
+// restore mode from storage (optional)
+try {
+  const savedMode = localStorage.getItem('mode') || 'heart';
+  if(savedMode === 'demon') enableDemonMode();
+  else startHeartRain('#globalHearts');
+} catch(e){
+  // localStorage may be blocked in some contexts
+  startHeartRain('#globalHearts');
+}
+
+// service worker registration (safe/caught)
+if('serviceWorker' in navigator){
+  window.addEventListener('load', ()=>{
+    navigator.serviceWorker.register('sw.js').catch(()=>{ /* fail silently */ });
+  });
+}
+</script>
+
+</body>
+</html>

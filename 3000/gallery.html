@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Galería de recuerdos ✨</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+
+<style>
+:root{
+  --bg1:#1a1026;
+  --bg2:#0f061a;
+  --accent:#ff6b9d;
+  --accent-soft:#ffc2d9;
+  --text:#ffffff;
+  --muted:#cbbdd9;
+}
+body.demon{
+  background:radial-gradient(circle at 20% 20%, #3a0000, #100000) !important;
+  color:#ffdddd;
+} 
+
+*{margin:0;padding:0;box-sizing:border-box}
+
+body{
+  font-family:'Inter',sans-serif;
+  background:radial-gradient(circle at 20% 20%, #2a1240, var(--bg2));
+  color:var(--text);
+  overflow-x:hidden;
+}
+
+section{padding:80px 20px;max-width:1200px;margin:auto}
+
+h1,h2{
+  font-family:'Playfair Display',serif;
+}
+
+.hero{min-height:40vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;position:relative;overflow:hidden;}
+#hearts{position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:1;}
+#galleryHearts{position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:1;}
+#globalHearts, #globalEmoji{position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:0;}
+.gallery-grid{position:relative;z-index:2;} 
+.gallery-card{position:relative;background:rgba(255,255,255,.05);border-radius:20px;overflow:hidden;}
+.gallery-card img{display:block;width:100%;height:240px;object-fit:cover;}
+.gallery-card .info{padding:12px;color:var(--text);}
+.gallery-card .info h3{margin:0 0 4px;font-size:1.1rem;}
+.gallery-card .info small{color:var(--muted);font-size:0.9rem;}
+
+.button{margin-top:20px;padding:14px 32px;border-radius:50px;border:none;background:linear-gradient(135deg,var(--accent),#ff9ecb);color:#2a0f1f;font-weight:700;cursor:pointer;font-size:1rem;box-shadow:0 10px 40px rgba(255,107,157,.4);transition:.3s ease;}
+.button:hover{transform:scale(1.05);}
+.button.ghost{background:transparent;color:var(--accent);border:2px solid var(--accent);box-shadow:none;}
+.hero-buttons{display:flex;flex-wrap:wrap;justify-content:center;gap:12px;margin-top:20px;}
+
+.gallery-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:25px;margin-top:50px;}
+.gallery-grid img{width:100%;height:320px;object-fit:cover;border-radius:20px;transition:.5s ease;box-shadow:0 15px 40px rgba(0,0,0,.5);} 
+.gallery-grid img:hover{transform:scale(1.05);}
+
+/* floating hearts */
+.heart{position:absolute;width:20px;height:20px;background:var(--accent);transform:rotate(-45deg);animation:float 8s linear infinite;}
+.heart::before,.heart::after{content:'';position:absolute;width:20px;height:20px;background:var(--accent);border-radius:50%;}
+.heart::before{top:-10px;left:0}
+.heart::after{left:10px;top:0}
+@keyframes float{0%{transform:translateY(100vh) rotate(-45deg);opacity:0}20%{opacity:1}100%{transform:translateY(-10vh) rotate(-45deg);opacity:0}}
+
+/* emoji rain */
+.emoji{position:absolute;font-size:24px;animation:fall 6s linear infinite;pointer-events:none;}
+@keyframes fall{0%{transform:translateY(-40px) rotate(0deg);opacity:1;}100%{transform:translateY(110vh) rotate(360deg);opacity:0;}}
+</style>
+</head>
+<body>
+<noscript><p style="text-align:center;color:#f88;padding:20px;">Activa JavaScript para ver esta página correctamente.</p></noscript>
+<div id="globalHearts" aria-hidden="true"></div>
+<div id="globalEmoji" aria-hidden="true"></div>
+
+<section class="hero">
+  <div id="hearts"></div>
+  <h1>Galería de recuerdos</h1>
+  <div class="hero-buttons">
+    <button class="button ghost" id="modeBtn">😈</button>
+    <button class="button ghost" id="backBtn">🔙 Volver</button>
+    <button class="button ghost" id="musicBtn" title="Reproducir música">🎧</button>
+  </div>
+</section>
+<!-- hidden audio element for gallery music -->
+<audio id="galleryAudio" src="" preload="auto" style="display:none;"></audio>
+
+<section style="position:relative;">
+  <div id="galleryHearts"></div>
+  <div class="gallery-grid" id="galleryGrid"></div>
+</section>
+
+<script>
+const CONFIG = {
+  photos:[
+    // standalone shots
+    {src:'https://images.unsplash.com/photo-1529626455594-4ff0802cfb7e',title:'Primera cita',date:'2025-03-02'},
+    {src:'https://images.unsplash.com/photo-1503342217505-b0a15ec3261c',title:'Viaje inolvidable',date:'2025-06-15'},
+    {src:'https://images.unsplash.com/photo-1511988617509-a57c8a288659',title:'Tarde de risas',date:'2025-09-10'},
+    {src:'https://images.unsplash.com/photo-1492562080023-ab3db95bfbce',title:'Cena romántica',date:'2025-11-20'},
+    {src:'https://images.unsplash.com/photo-1516762689617-4f1b01fd1d5a',title:'Paseo juntos',date:'2026-01-05'},
+    {src:'https://images.unsplash.com/photo-1509021436665-8f07dbf5bf1d',title:'Concertazo',date:'2026-02-14'},
+    // carpeta viajes
+    {folder:'Viajes',items:[
+      {src:'https://images.unsplash.com/photo-1507525428034-b723cf961d3e',title:'Playa paradisiaca',date:'2025-07-08'},
+      {src:'https://images.unsplash.com/photo-1528193718247-78bbd9736a6b',title:'Montañas nevadas',date:'2025-12-01'},
+      {src:'https://images.unsplash.com/photo-1547118904-d4b4e5c14dd0',title:'Ciudad antigua',date:'2025-05-22'}
+    ]},
+    // carpeta la bebe
+    {folder:'La bebe',items:[
+      {src:'https://images.unsplash.com/photo-1544005313-94ddf0286df2',title:'Primer abrazo',date:'2026-02-01'},
+      {src:'https://images.unsplash.com/photo-1507413245164-6160d8298b31',title:'Sonrisa',date:'2026-01-20'},
+      {src:'https://images.unsplash.com/photo-1600488992516-3a68d0b03f94',title:'Sueños',date:'2026-01-30'}
+    ]},
+    // carpeta atardeceres
+    {folder:'Atardeceres',items:[
+      {src:'https://images.unsplash.com/photo-1501973801546-d7d8e06415c2',title:'Silueta dorada',date:'2025-08-19'},
+      {src:'https://images.unsplash.com/photo-1519608487953-e999c86e7455',title:'Reflejo en el lago',date:'2025-09-25'},
+      {src:'https://images.unsplash.com/photo-1501592093414-8e00d3f7aa99',title:'Cielo en llamas',date:'2025-10-10'}
+    ]},
+    // carpeta moments
+    {folder:'Moments',items:[
+      {src:'https://images.unsplash.com/photo-1496307042754-b4aa456c4a2d',title:'Risa contagiosa',date:'2025-04-14'},
+      {src:'https://images.unsplash.com/photo-1505678261036-a3fcc5e884ee',title:'Mirada cómplice',date:'2025-06-30'},
+      {src:'https://images.unsplash.com/photo-1523473827534-7a5e4a8812b8',title:'Baile bajo la lluvia',date:'2025-11-05'}
+    ]}
+  ]
+};
+function startHeartRain(containerSelector){
+  const container = containerSelector ? document.querySelector(containerSelector) : document.body;
+  if(!container) return;
+  heartInterval=setInterval(()=>{
+    const heart=document.createElement('div');
+    heart.className='heart';
+    heart.style.left=Math.random()*100+'vw';
+    heart.style.animationDuration=(6+Math.random()*5)+'s';
+    container.appendChild(heart);
+    setTimeout(()=>heart.remove(),10000);
+  },800);
+}
+function stopHeartRain(containerSelector){
+  clearInterval(heartInterval);
+  const sel = containerSelector || 'body';
+  document.querySelectorAll(sel+' .heart').forEach(h=>h.remove());
+}
+let heartInterval,emojiInterval,demonMode=false;
+function startEmojiRain(containerSelector){
+  const c=document.querySelector(containerSelector);
+  emojiInterval=setInterval(()=>{const e=document.createElement('div');e.className='emoji';e.textContent=Math.random()<0.5?'🍑':'🍆';e.style.left=Math.random()*100+'vw';c.appendChild(e);setTimeout(()=>e.remove(),7000);},300);
+}
+function stopEmojiRain(containerSelector){clearInterval(emojiInterval);document.querySelectorAll(containerSelector+' .emoji').forEach(e=>e.remove());}
+
+document.getElementById('modeBtn').addEventListener('click',()=>{
+  if(!demonMode){
+    demonMode=true;
+    document.body.classList.add('demon');
+    stopHeartRain('#globalHearts');
+    startEmojiRain('#globalEmoji');
+    grid.innerHTML = '';
+    // add the demon images now
+    demonImages.forEach(photo=> addPhoto(grid,photo));
+    document.getElementById('modeBtn').textContent='❤️';
+  } else {
+    demonMode=false;
+    document.body.classList.remove('demon');
+    stopEmojiRain('#globalEmoji');
+    startHeartRain('#globalHearts');
+    grid.innerHTML = savedGridHTML;
+    document.getElementById('modeBtn').textContent='😈';
+  }
+});
+
+document.getElementById('backBtn').addEventListener('click',()=>{location.href='lita.html';});
+
+// build gallery (supports folders)
+const grid=document.getElementById('galleryGrid');
+function addPhoto(cardParent,photo){
+  const card=document.createElement('div');card.className='gallery-card';
+  card.innerHTML=`<img src="${photo.src}" alt="${photo.title}"><div class="info"><h3>${photo.title}</h3><small>${photo.date}</small></div>`;
+  const img=card.querySelector('img');
+  img.onerror=()=>{img.style.opacity='0.5';};
+  cardParent.appendChild(card);
+}
+// demon-specific images to show when the diablo aparece
+const demonImages=[
+  {src:'https://images.unsplash.com/photo-1604782576550-5b875f6d5c63',title:'Ojo del diablo',date:'2026-03-02'},
+  {src:'https://images.unsplash.com/photo-1618296800826-0f8a6a0843f7',title:'Fuego oscuro',date:'2026-03-02'},
+  {src:'https://images.unsplash.com/photo-1627312289922-5c5f5864c5ea',title:'Sombras',date:'2026-03-02'}
+];
+
+CONFIG.photos.forEach(item=>{
+  if(item.folder && Array.isArray(item.items)){
+    // section header
+    const header=document.createElement('h2');
+    header.textContent=item.folder;
+    header.style.gridColumn='1/-1';
+    header.style.margin='40px 0 0';
+    header.style.fontFamily='Playfair Display,serif';
+    header.style.textAlign='center';
+    grid.appendChild(header);
+    item.items.forEach(photo=> addPhoto(grid,photo));
+  } else {
+    addPhoto(grid,item);
+  }
+});
+// save original content to restore later
+const savedGridHTML = grid.innerHTML;
+
+// start default rain globally
+startHeartRain('#globalHearts');
+
+// audio toggle logic for gallery
+const galleryAudio = document.getElementById('galleryAudio');
+const musicBtn = document.getElementById('musicBtn');
+let playing=false;
+function updateMusicIcon(){
+  musicBtn.textContent = playing ? '⏸️' : '🎧';
+}
+musicBtn.addEventListener('click', ()=>{
+  if(!galleryAudio.src) return; // no track set
+  if(playing){ galleryAudio.pause(); }
+  else { galleryAudio.play(); }
+});
+galleryAudio.addEventListener('play', ()=>{ playing=true; updateMusicIcon(); });
+galleryAudio.addEventListener('pause', ()=>{ playing=false; updateMusicIcon(); });
+
+// you can set galleryAudio.src manually in CONFIG if needed
+if(CONFIG.galleryTrack) {
+  galleryAudio.src = CONFIG.galleryTrack;
+}
+</script>
+</body>
+</html>
